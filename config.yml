@@ -1,0 +1,41 @@
+########
+# NetLab
+########
+
+# ---- Experiment specific parameters
+experiment:
+  tag: "420"
+
+# --- Data
+# cifar10, imagewoof
+data:
+  dataset: "imagewoof"
+  num_workers: 4
+
+# ---- Training
+train:
+  n_epochs: 10
+  learning_rate: 1.0e-3
+  weight_decay: 0.0
+  lr_step_size: 50
+  lr_gamma: 0.5
+  batch_size: 256
+
+# ---- Summary
+summary:
+  add_graph: true
+  add_sample_batch: true
+  save_train_stats_every_n_epochs: 1
+  save_test_stats_every_n_epochs: 10
+  add_params_hist_every_n_epochs: 10
+  save_model_every_n_epochs: 50
+
+checkpoints:
+  load_model: 0
+  model_path: 0
+
+# ---- Directories
+dirs:
+  weights: "weights"
+  runs: "runs"
+  data: "data"
