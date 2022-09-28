@@ -50,6 +50,10 @@ if __name__ == "__main__":
     main()
 ```
 
+## TODOs
+
+- Find better method for configuration (custom config class, argparse, ...)
+
 ## License
 
 MIT

@@ -167,3 +167,22 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+
+###############
+# Tensorboard #
+###############
+
+**/runs/**
+
+########
+# Data #
+########
+
+**/data/**
+
+###################
+# Network weights #
+###################
+
+**/weights/**

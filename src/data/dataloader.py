@@ -15,12 +15,12 @@ from .dataset import TensorDataset
 def seed_worker(worker_id):
     """Seed dataloader workers."""
     worker_seed = torch.initial_seed() % 2**32
-    print(f"{worker_seed = }")
     np.random.seed(worker_seed)
     random.seed(worker_seed)
 
 
 def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
+    """Creates dataloader for specified dataset."""
 
     dataset = config["data"]["dataset"]
     num_workers = config["data"]["num_workers"]
@@ -77,8 +77,9 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
 
     elif dataset == "cifar10":
 
-        mean = (0.4914, 0.4822, 0.4465)
-        std = (0.2023, 0.1994, 0.2010)
+        cifar10 = torchvision.datasets.CIFAR10(root="./data", train=True, download=True)
+        mean = np.mean(np.array(cifar10.data / 255.0), axis=(0, 1, 2))      # [0.49139968 0.48215841 0.44653091]
+        std = np.std(np.array(cifar10.data / 255.0), axis=(0, 1, 2))        # [0.24703223 0.24348513 0.26158784]
 
         transform_train = transforms.Compose(
             [
