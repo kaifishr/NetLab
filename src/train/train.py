@@ -23,7 +23,7 @@ def train(model: torch.nn.Module, dataloader: tuple, config: dict) -> None:
     """
     runs_dir = config["dirs"]["runs"]
     dataset = config["data"]["dataset"]
-    uid = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S.%f')
+    uid = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S.%f")
     tag = config["experiment"]["tag"]
 
     log_dir = os.path.join(runs_dir, f"{uid}_{dataset}{f'_{tag}' if tag else ''}")
@@ -49,7 +49,9 @@ def run_training(model, dataloader, writer, config: dict) -> None:
     device = config["device"]
     dataset = config["data"]["dataset"]
     n_epochs = config["train"]["n_epochs"]
-    save_train_stats_every_n_epochs = config["summary"]["save_train_stats_every_n_epochs"]
+    save_train_stats_every_n_epochs = config["summary"][
+        "save_train_stats_every_n_epochs"
+    ]
     save_test_stats_every_n_epochs = config["summary"]["save_test_stats_every_n_epochs"]
     step_size = config["train"]["lr_step_size"]
     gamma = config["train"]["lr_gamma"]
@@ -62,15 +64,23 @@ def run_training(model, dataloader, writer, config: dict) -> None:
 
     # Add sample batch to Tensorboard.
     if config["summary"]["add_sample_batch"]:
-        add_input_samples(dataloader=trainloader, writer=writer, tag="train", global_step=0)
-        add_input_samples(dataloader=testloader, writer=writer, tag="test", global_step=0)
+        add_input_samples(
+            dataloader=trainloader, writer=writer, tag="train", global_step=0
+        )
+        add_input_samples(
+            dataloader=testloader, writer=writer, tag="test", global_step=0
+        )
 
     learning_rate = config["train"]["learning_rate"]
     weight_decay = config["train"]["weight_decay"]
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer = optim.Adam(
+        model.parameters(), lr=learning_rate, weight_decay=weight_decay
+    )
 
     criterion = nn.CrossEntropyLoss()
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)
+    scheduler = torch.optim.lr_scheduler.StepLR(
+        optimizer, step_size=step_size, gamma=gamma
+    )
 
     n_update_steps = 0
 
@@ -108,7 +118,9 @@ def run_training(model, dataloader, writer, config: dict) -> None:
             running_counter += labels.size(0)
 
         writer.add_scalar("time_per_epoch", time.time() - t0, global_step=epoch)
-        writer.add_scalar("learning_rate", scheduler.get_last_lr()[0], global_step=epoch)
+        writer.add_scalar(
+            "learning_rate", scheduler.get_last_lr()[0], global_step=epoch
+        )
 
         scheduler.step()
 
@@ -117,25 +129,32 @@ def run_training(model, dataloader, writer, config: dict) -> None:
 
         if (epoch % save_train_stats_every_n_epochs == 0) or (epoch + 1 == n_epochs):
             writer.add_scalar("train_loss", running_loss, global_step=n_update_steps)
-            writer.add_scalar("train_accuracy", running_accuracy, global_step=n_update_steps)
+            writer.add_scalar(
+                "train_accuracy", running_accuracy, global_step=n_update_steps
+            )
 
         if (epoch % save_test_stats_every_n_epochs == 0) or (epoch + 1 == n_epochs):
-            test_loss, test_accuracy = comp_stats_classification(model=model,
-                                                                 criterion=criterion,
-                                                                 data_loader=testloader,
-                                                                 device=device)
+            test_loss, test_accuracy = comp_stats_classification(
+                model=model, criterion=criterion, data_loader=testloader, device=device
+            )
             writer.add_scalar("test_loss", test_loss, global_step=n_update_steps)
-            writer.add_scalar("test_accuracy", test_accuracy, global_step=n_update_steps)
+            writer.add_scalar(
+                "test_accuracy", test_accuracy, global_step=n_update_steps
+            )
 
         if config["summary"]["add_params_hist_every_n_epochs"] > 0:
-            if (epoch % config["summary"]["add_params_hist_every_n_epochs"] == 0) \
-                    or (epoch + 1 == n_epochs):
+            if (epoch % config["summary"]["add_params_hist_every_n_epochs"] == 0) or (
+                epoch + 1 == n_epochs
+            ):
                 add_hist_params(model=model, writer=writer, global_step=epoch)
 
         if config["summary"]["save_model_every_n_epochs"] > 0:
-            if (epoch % config["summary"]["save_model_every_n_epochs"] == 0) \
-                    or (epoch + 1 == n_epochs):
-                model_name = f"{dataset}_epoch_{epoch:04d}{f'_{tag}' if tag else ''}.pth"
+            if (epoch % config["summary"]["save_model_every_n_epochs"] == 0) or (
+                epoch + 1 == n_epochs
+            ):
+                model_name = (
+                    f"{dataset}_epoch_{epoch:04d}{f'_{tag}' if tag else ''}.pth"
+                )
                 model_path = os.path.join(config["dirs"]["weights"], model_name)
                 torch.save(model.state_dict(), model_path)
 

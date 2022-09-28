@@ -6,7 +6,6 @@ import torch.nn as nn
 
 
 class EntropyLoss(nn.Module):
-
     def __init__(self):
         super().__init__()
         self.flatten = torch.nn.Flatten(start_dim=1, end_dim=-1)

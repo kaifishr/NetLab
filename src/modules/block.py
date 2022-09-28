@@ -6,7 +6,6 @@ from torch import nn
 
 
 class DenseBlock(nn.Module):
-
     def __init__(self, in_features: int, out_features: int):
         super().__init__()
 
@@ -34,13 +33,15 @@ class DenseBlock(nn.Module):
 
 
 class ConvBlock(torch.nn.Module):
-
     def __init__(self, num_channels: int):
         super().__init__()
 
-        conv_cfg = dict(in_channels=num_channels,
-                        out_channels=num_channels,
-                        kernel_size=3, padding="same")
+        conv_cfg = dict(
+            in_channels=num_channels,
+            out_channels=num_channels,
+            kernel_size=3,
+            padding="same",
+        )
 
         self.conv1 = nn.Conv2d(**conv_cfg)
         self.conv2 = nn.Conv2d(**conv_cfg)

@@ -11,12 +11,12 @@ from src.utils.tools import set_random_seed
 
 def experiment_imagewoof():
 
-    # Seed random number generator
-    set_random_seed(seed=69)
-
     # Get configuration file
     config = init_config(file_path="config.yml")
     config["data"]["dataset"] = "imagewoof"
+
+    # Seed random number generator
+    set_random_seed(seed=config["experiment"]["random_seed"])
 
     # Get dataloader
     dataloader = get_dataloader(config=config)
@@ -33,12 +33,12 @@ def experiment_imagewoof():
 
 def experiment_cifar10():
 
-    # Seed random number generator
-    set_random_seed(seed=69)
-
     # Get configuration file
     config = init_config(file_path="config.yml")
     config["data"]["dataset"] = "cifar10"
+
+    # Seed random number generator
+    set_random_seed(seed=config["experiment"]["random_seed"])
 
     # Get dataloader
     dataloader = get_dataloader(config=config)
@@ -54,7 +54,7 @@ def experiment_cifar10():
 
 
 def main():
-    # experiment_imagewoof()
+    experiment_imagewoof()
     experiment_cifar10()
 
 

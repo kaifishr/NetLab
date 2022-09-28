@@ -97,9 +97,9 @@ def set_attribute(model: torch.nn.Module, attribute: str, value) -> None:
             setattr(module, attribute, value)
 
 
-def count_model_parameters(model: nn.Module,
-                           is_trainable: bool = True,
-                           verbose: bool = True) -> int:
+def count_model_parameters(
+    model: nn.Module, is_trainable: bool = True, verbose: bool = True
+) -> int:
     """Counts model parameters.
 
     Args:
@@ -111,15 +111,19 @@ def count_model_parameters(model: nn.Module,
         Number of model parameters.
 
     """
-    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad is is_trainable)
+    n_params = sum(
+        p.numel() for p in model.parameters() if p.requires_grad is is_trainable
+    )
 
     if verbose:
-        print(f"Number of trainable parameters: {'.'.join(wrap(str(n_params)[::-1], 3))[::-1]}.")
+        print(
+            f"Number of trainable parameters: {'.'.join(wrap(str(n_params)[::-1], 3))[::-1]}."
+        )
 
     return n_params
 
 
-def set_random_seed(seed: int = 69) -> None:
+def set_random_seed(seed: int = 0, is_cuda_deterministic: bool = False) -> None:
     """Controls sources of randomness.
 
     This method is not bulletproof.
@@ -132,3 +136,5 @@ def set_random_seed(seed: int = 69) -> None:
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
+    if is_cuda_deterministic:
+        torch.use_deterministic_algorithms(is_cuda_deterministic)

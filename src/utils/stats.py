@@ -2,7 +2,9 @@ import torch
 
 
 @torch.no_grad()
-def comp_stats_classification(model, criterion, data_loader, device) -> tuple[float, float]:
+def comp_stats_classification(
+    model, criterion, data_loader, device
+) -> tuple[float, float]:
     """Compute loss and accuracy for classification task."""
     model.eval()
     running_loss = 0.0

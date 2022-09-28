@@ -10,8 +10,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 
 def tensorboard_event_to_pandas(path: str) -> pd.DataFrame:
-    """Convert single tensorflow log file to pandas DataFrame.
-    """
+    """Convert single tensorflow log file to pandas DataFrame."""
     DEFAULT_SIZE_GUIDANCE = {
         "compressedHistograms": 0,
         "images": 0,
@@ -48,8 +47,7 @@ def tensorboard_event_to_pandas(path: str) -> pd.DataFrame:
 
 
 def main(log_dir: str, write_pkl: bool, write_csv: bool, out_dir: str):
-    """
-    """
+    """ """
     if os.path.isdir(log_dir):
         event_paths = glob.glob(os.path.join(log_dir, "*", "event*"))
     elif os.path.isfile(log_dir):

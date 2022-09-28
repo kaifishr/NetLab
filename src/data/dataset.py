@@ -3,8 +3,8 @@ from torch.utils.data import Dataset
 
 
 class TensorDataset(Dataset):
-    """TensorDataset with support of transforms.
-    """
+    """TensorDataset with support of transforms."""
+
     def __init__(self, tensors: tuple[torch.Tensor, torch.Tensor], transform=None):
         assert all(tensors[0].size(0) == tensor.size(0) for tensor in tensors)
         self.tensors = tensors

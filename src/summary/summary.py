@@ -9,10 +9,9 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 
 
-def add_graph(model: nn.Module,
-              dataloader: DataLoader,
-              writer: SummaryWriter,
-              config: dict) -> None:
+def add_graph(
+    model: nn.Module, dataloader: DataLoader, writer: SummaryWriter, config: dict
+) -> None:
     """Add graph of model to Tensorboard.
 
     Args:
@@ -27,11 +26,13 @@ def add_graph(model: nn.Module,
     writer.add_graph(model=model, input_to_model=x_data.to(device))
 
 
-def add_input_samples(dataloader: DataLoader,
-                      tag: str,
-                      writer: SummaryWriter,
-                      global_step: int = 0,
-                      n_samples: int = 16) -> None:
+def add_input_samples(
+    dataloader: DataLoader,
+    tag: str,
+    writer: SummaryWriter,
+    global_step: int = 0,
+    n_samples: int = 16,
+) -> None:
     """Add samples from dataloader to Tensorboard.
 
     Check if the input to the model is as expected.
@@ -51,7 +52,7 @@ def add_input_samples(dataloader: DataLoader,
     x_max, _ = torch.max(torch.flatten(x, start_dim=2), dim=-1)
     x_min = x_min[..., None, None]
     x_max = x_max[..., None, None]
-    x = ((x - x_min) / (x_max - x_min))
+    x = (x - x_min) / (x_max - x_min)
     writer.add_images(tag=f"sample_batch_{tag}", img_tensor=x)
 
 
@@ -59,11 +60,13 @@ def add_hyperparameters(config: dict):
     """Add hyperparameters to Tensorboard."""
 
 
-def add_hist_params(model: nn.Module,
-                    writer: SummaryWriter,
-                    global_step: int,
-                    add_weights: bool = True,
-                    add_bias: bool = True) -> None:
+def add_hist_params(
+    model: nn.Module,
+    writer: SummaryWriter,
+    global_step: int,
+    add_weights: bool = True,
+    add_bias: bool = True,
+) -> None:
     """Add histogram for trainable parameters such as weights and biases to Tensorboard.
 
     Allows to determine whether parameters are sufficiently updated.
@@ -85,7 +88,7 @@ def add_hist_params(model: nn.Module,
                     writer.add_histogram(
                         tag=f"{name}_weight",
                         values=module.weight.data,
-                        global_step=global_step
+                        global_step=global_step,
                     )
         if add_bias:
             if hasattr(module, "bias"):
@@ -93,5 +96,5 @@ def add_hist_params(model: nn.Module,
                     writer.add_histogram(
                         tag=f"{name}_bias",
                         values=module.bias.data,
-                        global_step=global_step
+                        global_step=global_step,
                     )

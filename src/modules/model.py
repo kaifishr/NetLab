@@ -9,9 +9,8 @@ from .block import ConvBlock, DenseBlock
 
 
 class ConvNet(nn.Module):
-    """Isotropic convolutional neural network with residual connections.
+    """Isotropic convolutional neural network with residual connections."""
 
-    """
     def __init__(self, config: dict):
         super().__init__()
 
@@ -23,7 +22,9 @@ class ConvNet(nn.Module):
         self.n_blocks = 6
 
         self.features = self._feature_extractor()
-        self.classifier = nn.Linear(self.n_channels_out*(self.input_shape[-1]//4)**2, self.n_dims_out)
+        self.classifier = nn.Linear(
+            self.n_channels_out * (self.input_shape[-1] // 4) ** 2, self.n_dims_out
+        )
 
         self._weights_init()
 
@@ -32,10 +33,13 @@ class ConvNet(nn.Module):
 
         # Conv network input
         layers += [
-            nn.Conv2d(in_channels=self.n_channels_in,
-                      out_channels=self.n_channels_hidden,
-                      kernel_size=2, stride=2),
-            nn.BatchNorm2d(num_features=self.n_channels_hidden)
+            nn.Conv2d(
+                in_channels=self.n_channels_in,
+                out_channels=self.n_channels_hidden,
+                kernel_size=2,
+                stride=2,
+            ),
+            nn.BatchNorm2d(num_features=self.n_channels_hidden),
         ]
 
         # Conv network hidden
@@ -44,11 +48,14 @@ class ConvNet(nn.Module):
 
         # Conv network out
         layers += [
-            nn.Conv2d(in_channels=self.n_channels_hidden,
-                      out_channels=self.n_channels_out,
-                      kernel_size=2, stride=2),
+            nn.Conv2d(
+                in_channels=self.n_channels_hidden,
+                out_channels=self.n_channels_out,
+                kernel_size=2,
+                stride=2,
+            ),
             nn.ReLU(inplace=True),
-            nn.BatchNorm2d(num_features=self.n_channels_out)
+            nn.BatchNorm2d(num_features=self.n_channels_out),
         ]
 
         return nn.Sequential(*layers)
@@ -68,9 +75,8 @@ class ConvNet(nn.Module):
 
 
 class DenseNet(nn.Module):
-    """Isotropic fully connected neural network with residual connections.
+    """Isotropic fully connected neural network with residual connections."""
 
-    """
     def __init__(self, config: dict):
         super().__init__()
 
@@ -90,12 +96,16 @@ class DenseNet(nn.Module):
         # Input layer
         layers += [
             nn.Linear(in_features=self.n_dims_in, out_features=self.n_dims_hidden),
-            nn.BatchNorm1d(num_features=self.n_dims_hidden)
+            nn.BatchNorm1d(num_features=self.n_dims_hidden),
         ]
 
         # Hidden layer
         for i in range(self.n_blocks):
-            layers.append(DenseBlock(in_features=self.n_dims_hidden, out_features=self.n_dims_hidden))
+            layers.append(
+                DenseBlock(
+                    in_features=self.n_dims_hidden, out_features=self.n_dims_hidden
+                )
+            )
 
         # Output layer
         layers += [nn.Linear(self.n_dims_hidden, self.n_dims_out)]
