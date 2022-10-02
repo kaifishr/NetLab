@@ -8,16 +8,16 @@ and lets you focus on developing neural network architectures.
 NetLab comes with a series of useful utilities for rapid prototyping and 
 explorative tools.
 
-
 ## Usage
 
+### Training a network:
+
 ```python
-from src.modules.model import ConvNet, DenseNet
+from src.modules.model import ConvNet
 from src.data.dataloader import get_dataloader
 from src.config.config import init_config
 from src.train.train import train
 from src.utils.tools import set_random_seed
-from src.utils.random_search import create_random_config_
 
 
 def experiment_imagewoof():
@@ -44,6 +44,57 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+### Random Hyperparameter Search:
+
+```python
+from src.modules.model import DenseNet
+from src.data.dataloader import get_dataloader
+from src.config.config import init_config
+from src.train.train import train
+from src.utils.tools import set_random_seed
+from src.utils.random_search import create_random_config_
+
+
+def experiment_random_search():
+
+    n_runs = 1000
+    n_epochs = 10
+
+    config = init_config(file_path="config.yml")
+
+    config.trainer.n_epochs = n_epochs
+    config.dataloader.dataset = "cifar10"
+    config.tag = "random_search"
+
+    for _ in range(n_runs):
+
+        create_random_config_(config)
+
+        set_random_seed(seed=config.random_seed)
+
+        dataloader = get_dataloader(config=config)
+
+        print(config)
+        model = DenseNet(config=config)
+        model.to(config.trainer.device)
+
+        train(model=model, dataloader=dataloader, config=config)
+
+
+def main():
+    experiment_random_search()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## Cleaning up
+
+```console
+python make_clean.py --folders data/ runs/ weights/
 ```
 
 ## License
