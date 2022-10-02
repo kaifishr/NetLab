@@ -1,31 +1,30 @@
 """Neural network testbed for rapid testing of ideas.
-"""
-import json
 
+This file shows a few examples how to use NetLab.
+"""
 from src.modules.model import ConvNet, DenseNet
 from src.data.dataloader import get_dataloader
 from src.config.config import init_config
 from src.train.train import train
 from src.utils.tools import set_random_seed
+from src.utils.random_search import create_random_config_
 
 
 def experiment_imagewoof():
 
-    # Get configuration file
     config = init_config(file_path="config.yml")
-    config["data"]["dataset"] = "imagewoof"
 
-    # Seed random number generator
-    set_random_seed(seed=config["experiment"]["random_seed"])
+    config.tag = "convnet"
+    config.dataloader.dataset = "imagewoof"
 
-    # Get dataloader
+    set_random_seed(seed=config.random_seed)
+
     dataloader = get_dataloader(config=config)
-    print(json.dumps(config, indent=4))
 
-    # Get the model
     model = ConvNet(config=config)
-    model.to(config["device"])
+    model.to(config.trainer.device)
 
+    print(config)
     train(model=model, dataloader=dataloader, config=config)
 
     print("Experiment finished.")
@@ -33,22 +32,48 @@ def experiment_imagewoof():
 
 def experiment_cifar10():
 
-    # Get configuration file
     config = init_config(file_path="config.yml")
-    config["data"]["dataset"] = "cifar10"
 
-    # Seed random number generator
-    set_random_seed(seed=config["experiment"]["random_seed"])
+    config.tag = "densenet"
+    config.dataloader.dataset = "cifar10"
 
-    # Get dataloader
+    set_random_seed(seed=config.random_seed)
+
     dataloader = get_dataloader(config=config)
-    print(json.dumps(config, indent=4))
 
-    # Get the model
     model = DenseNet(config=config)
-    model.to(config["device"])
+    model.to(config.trainer.device)
 
+    print(config)
     train(model=model, dataloader=dataloader, config=config)
+
+    print("Experiment finished.")
+
+
+def experiment_random_search():
+
+    n_runs = 5
+    n_epochs = 1
+
+    config = init_config(file_path="config.yml")
+
+    config.trainer.n_epochs = n_epochs
+    config.dataloader.dataset = "cifar10"
+    config.tag = "random_search"
+
+    for _ in range(n_runs):
+
+        create_random_config_(config)
+
+        set_random_seed(seed=config.random_seed)
+
+        dataloader = get_dataloader(config=config)
+
+        print(config)
+        model = DenseNet(config=config)
+        model.to(config.trainer.device)
+
+        train(model=model, dataloader=dataloader, config=config)
 
     print("Experiment finished.")
 
@@ -56,6 +81,7 @@ def experiment_cifar10():
 def main():
     experiment_imagewoof()
     experiment_cifar10()
+    experiment_random_search()
 
 
 if __name__ == "__main__":

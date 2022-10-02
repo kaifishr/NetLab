@@ -2,40 +2,63 @@
 # NetLab
 ########
 
-# ---- Experiment specific parameters
-experiment:
-  tag: "blafoo"
-  random_seed: 0
+tag: Null
+random_seed: 0
 
-##########
-## Data ##
-##########
+##############
+# Dataloader #
+##############
 # cifar10, imagewoof
-data:
-  dataset: "imagewoof"
-  num_workers: 4
+dataloader:
+  dataset: "cifar10"
+  num_workers: 2
 
-############
-# Training #
-############
-train:
+########
+# Data #
+########
+data:
+  n_classes: Null
+  input_shape: Null
+
+#########
+# Model #
+#########
+
+convnet:
+  n_channels_hidden: 16
+  n_channels_out: 8
+  n_blocks: 4
+
+densenet:
+  n_dims_hidden: 128
+  n_blocks: 4
+
+###########
+# Trainer #
+###########
+
+trainer:
+  device: "gpu"   # gpu, cpu
   n_epochs: 1
-  learning_rate: 1.0e-3
-  weight_decay: 0.0
-  lr_step_size: 50
+  learning_rate: 1.0e-4
+  weight_decay: 0
+  lr_step_size: 100
   lr_gamma: 0.5
-  batch_size: 256
+  batch_size: 64
+  grad_norm_clip: 1.0
 
 ###########
 # Summary #
 ###########
+
 summary:
   add_graph: true
   add_sample_batch: true
+  add_hparams: true
   save_train_stats_every_n_epochs: 1
   save_test_stats_every_n_epochs: 10
-  add_params_hist_every_n_epochs: 10
-  save_model_every_n_epochs: 50
+  add_params_hist_every_n_epochs: 50
+  save_model_every_n_epochs: -1
 
 checkpoints:
   load_model: 0
@@ -44,8 +67,8 @@ checkpoints:
 ###############
 # Directories #
 ###############
-dirs:
-  weights: "weights"
-  runs: "runs"
-  data: "data"
 
+dirs:
+  data: "data"
+  runs: "runs"
+  weights: "weights"

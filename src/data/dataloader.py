@@ -22,9 +22,9 @@ def seed_worker(worker_id):
 def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
     """Creates dataloader for specified dataset."""
 
-    dataset = config["data"]["dataset"]
-    num_workers = config["data"]["num_workers"]
-    batch_size = config["train"]["batch_size"]
+    dataset = config.dataloader.dataset 
+    num_workers = config.dataloader.num_workers
+    batch_size = config.trainer.batch_size
 
     if dataset == "imagewoof":
 
@@ -72,8 +72,8 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
         )
 
         # Add number of classes and input shape to config
-        config["n_classes"] = 10
-        config["input_shape"] = (3, 128, 128)
+        config.data.n_classes = 10
+        config.data.input_shape = (3, 128, 128)
 
     elif dataset == "cifar10":
 
@@ -105,8 +105,8 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
         )
 
         # Add number of classes and input shape to config
-        config["n_classes"] = 10
-        config["input_shape"] = (3, 32, 32)
+        config.data.n_classes = 10
+        config.data.input_shape = (3, 32, 32)
 
     elif dataset == "custom_from_numpy":
         """
@@ -149,14 +149,15 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
             (test_images, test_labels), transform=transform_test
         )
 
-        config["n_classes"] = 2
-        config["input_shape"] = (3, 32, 32)
+        # Add number of classes and input shape to config
+        config.data.n_classes = 2
+        config.data.input_shape = (3, 32, 32)
 
     else:
         raise NotImplementedError(f"Dataloader for {dataset} not implemented.")
 
     generator = torch.Generator()
-    generator.manual_seed(config["experiment"]["random_seed"])
+    generator.manual_seed(config.random_seed)
 
     trainloader = torch.utils.data.DataLoader(
         dataset=train_dataset,

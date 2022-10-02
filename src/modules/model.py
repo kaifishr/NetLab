@@ -14,12 +14,12 @@ class ConvNet(nn.Module):
     def __init__(self, config: dict):
         super().__init__()
 
-        self.input_shape = config["input_shape"]
+        self.input_shape = config.data.input_shape
         self.n_channels_in = self.input_shape[0]
-        self.n_channels_hidden = 16
-        self.n_channels_out = 8
-        self.n_dims_out = 10
-        self.n_blocks = 6
+        self.n_dims_out = config.data.n_classes
+        self.n_channels_hidden = config.convnet.n_channels_hidden
+        self.n_channels_out = config.convnet.n_channels_out
+        self.n_blocks = config.convnet.n_blocks
 
         self.features = self._feature_extractor()
         self.classifier = nn.Linear(
@@ -80,11 +80,11 @@ class DenseNet(nn.Module):
     def __init__(self, config: dict):
         super().__init__()
 
-        self.input_shape = config["input_shape"]
+        self.input_shape = config.data.input_shape
         self.n_dims_in = prod(self.input_shape)
-        self.n_dims_hidden = 128
-        self.n_dims_out = config["n_classes"]
-        self.n_blocks = 6
+        self.n_dims_out = config.data.n_classes
+        self.n_dims_hidden = config.densenet.n_dims_hidden
+        self.n_blocks = config.densenet.n_blocks
 
         self.classifier = self._make_classifier()
 
