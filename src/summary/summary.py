@@ -12,10 +12,7 @@ from ..config.config import Config
 
 
 def add_graph(
-    model: nn.Module, 
-    dataloader: DataLoader, 
-    writer: SummaryWriter, 
-    config: Config
+    model: nn.Module, dataloader: DataLoader, writer: SummaryWriter, config: Config
 ) -> None:
     """Add graph of model to Tensorboard.
 
@@ -105,12 +102,12 @@ def add_hist_params(
 
 
 def add_hparams(
-    writer: SummaryWriter, 
-    config: Config, 
-    train_loss: float, 
-    train_accuracy: float, 
-    test_loss: float, 
-    test_accuracy: float
+    writer: SummaryWriter,
+    config: Config,
+    train_loss: float,
+    train_accuracy: float,
+    test_loss: float,
+    test_accuracy: float,
 ) -> None:
     """Adds hyperparameters to tensorboard."""
 
@@ -128,4 +125,4 @@ def add_hparams(
         "hparam/test_accuracy": test_accuracy,
     }
 
-    writer.add_hparams(hparam_dict, metric_dict) 
+    writer.add_hparams(hparam_dict, metric_dict)
