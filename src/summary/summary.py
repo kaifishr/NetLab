@@ -3,19 +3,19 @@ summary.py
 
 Script holds methods for Tensorboard.
 """
+import math
 import torch
 from torch import nn
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 
+from src.modules.module import PatchEmbedding
+
 from ..config.config import Config
 
 
 def add_graph(
-    model: nn.Module, 
-    dataloader: DataLoader, 
-    writer: SummaryWriter, 
-    config: Config
+    model: nn.Module, dataloader: DataLoader, writer: SummaryWriter, config: Config
 ) -> None:
     """Add graph of model to Tensorboard.
 
@@ -105,12 +105,12 @@ def add_hist_params(
 
 
 def add_hparams(
-    writer: SummaryWriter, 
-    config: Config, 
-    train_loss: float, 
-    train_accuracy: float, 
-    test_loss: float, 
-    test_accuracy: float
+    writer: SummaryWriter,
+    config: Config,
+    train_loss: float,
+    train_accuracy: float,
+    test_loss: float,
+    test_accuracy: float,
 ) -> None:
     """Adds hyperparameters to tensorboard."""
 
@@ -128,4 +128,56 @@ def add_hparams(
         "hparam/test_accuracy": test_accuracy,
     }
 
-    writer.add_hparams(hparam_dict, metric_dict) 
+    writer.add_hparams(hparam_dict, metric_dict)
+
+
+def add_linear_weights(writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 64) -> None:
+    """"""
+    for name, module in model.named_modules():
+        if isinstance(module, nn.Linear):
+            weight = module.weight.detach().cpu()
+
+            # Rescale
+            x_min, _ = torch.min(weight, dim=-1, keepdim=True)
+            x_max, _ = torch.max(weight, dim=-1, keepdim=True)
+            weight_rescaled = (weight - x_min) / (x_max - x_min)
+
+            # Reshape
+            height, width = weight.shape
+            dim = int(math.sqrt(width))
+            weight_rescaled = weight_rescaled.reshape(-1, 1, dim, dim)
+
+            # Extract samples
+            n_samples = min(height, n_samples_max)
+            weight_rescaled = weight_rescaled[:n_samples]
+
+            writer.add_images(name, weight_rescaled, global_step, dataformats="NCHW")
+
+
+def add_module_weights(
+    writer: SummaryWriter,
+    model: nn.Module,
+    module_: nn.Module,
+    global_step: int,
+    n_samples_max: int = 64,
+) -> None:
+    """Adds visualization of module weights to Tensorboard."""
+    for name, module in model.named_modules():
+        if isinstance(module, module_):
+            weight = module.weight.detach().cpu()
+
+            # Rescale
+            x_min, _ = torch.min(weight, dim=-1, keepdim=True)
+            x_max, _ = torch.max(weight, dim=-1, keepdim=True)
+            weight_rescaled = (weight - x_min) / (x_max - x_min)
+
+            # Reshape
+            height, width = weight.shape
+            dim = int(math.sqrt(width))
+            weight_rescaled = weight_rescaled.reshape(-1, 1, dim, dim)
+
+            # Extract samples
+            n_samples = min(height, n_samples_max)
+            weight_rescaled = weight_rescaled[:n_samples]
+
+            writer.add_images(name, weight_rescaled, global_step, dataformats="NCHW")
