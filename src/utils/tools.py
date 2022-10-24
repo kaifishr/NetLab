@@ -140,6 +140,7 @@ def count_module_parameters(model: nn.Module, is_trainable: bool = True) -> None
                     print(f"    {spaces}{params_name}: {params.numel()}")
             count_parameters(module=child_module, indent=indent)
 
+    print("Parameters Per Module:")
     count_parameters(model)
 
 

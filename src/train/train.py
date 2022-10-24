@@ -10,12 +10,14 @@ from torch.utils.tensorboard import SummaryWriter
 
 from ..utils.stats import comp_stats_classification
 from ..summary.summary import (
-    add_graph, 
-    add_input_samples, 
-    add_hist_params, 
-    add_hparams
+    add_graph,
+    add_input_samples,
+    add_hist_params,
+    add_hparams,
+    add_linear_weights,
 )
 from ..config.config import Config
+from ..utils.tools import count_model_parameters, count_module_parameters
 
 
 def train(model: torch.nn.Module, dataloader: tuple, config: Config) -> None:
@@ -33,6 +35,9 @@ def train(model: torch.nn.Module, dataloader: tuple, config: Config) -> None:
     tag = config.tag
 
     log_dir = os.path.join(runs_dir, f"{uid}_{dataset}{f'_{tag}' if tag else ''}")
+
+    count_model_parameters(model=model)
+    count_module_parameters(model=model)
 
     writer = SummaryWriter(log_dir=log_dir)
     run_training(model=model, dataloader=dataloader, writer=writer, config=config)
@@ -148,12 +153,7 @@ def run_training(model, dataloader, writer, config: Config) -> None:
 
             if config.summary.add_hparams:
                 add_hparams(
-                    writer,
-                    config, 
-                    train_loss, 
-                    train_accuracy,
-                    test_loss,
-                    test_accuracy
+                    writer, config, train_loss, train_accuracy, test_loss, test_accuracy
                 )
 
         if config.summary.add_params_hist_every_n_epochs > 0:
@@ -171,5 +171,11 @@ def run_training(model, dataloader, writer, config: Config) -> None:
                 )
                 model_path = os.path.join(config.dirs.weights, model_name)
                 torch.save(model.state_dict(), model_path)
+
+        if config.summary.save_weights_every_n_epochs > 0:
+            if (epoch % config.summary.save_weights_every_n_epochs == 0) or (
+                epoch + 1 == n_epochs
+            ):
+                add_linear_weights(model=model, writer=writer, global_step=epoch)
 
         print(f"{epoch:04d} {train_loss:.5f} {train_accuracy:.4f}")
