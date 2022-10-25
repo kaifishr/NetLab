@@ -1,17 +1,51 @@
 """Collection of custom neural networks.
 
 """
+import random
 from math import prod
 import torch
 import torch.nn as nn
 
-from .block import ConvBlock, DenseBlock
+from src.config import Config
+from .block import ConvBlock
+from .module import PatchEmbedding, DenseBlock, MixerBlock, AveragePool
+
+
+class MlpMixer(nn.Module):
+
+    def __init__(self, config: Config) -> None:
+        super().__init__()
+
+        self.max_rand_depth = 8
+
+        num_blocks = config.module.mlp_mixer.num_blocks
+        model_dim = config.module.mlp_mixer.model_dim
+        num_classes = config.data.num_classes
+
+        self.patch_embedding = PatchEmbedding(config)
+
+        mixer_blocks = [MixerBlock(config) for _ in range(num_blocks)]
+        self.mixer = nn.Sequential(*mixer_blocks)
+
+        self.mlp_head = nn.Sequential(
+            nn.LayerNorm(model_dim),
+            AveragePool(dim=-2),
+            nn.Linear(in_features=model_dim, out_features=num_classes)
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """"""
+        x = self.patch_embedding(x)
+        for _ in range(random.randint(1, self.max_rand_depth)):
+            x = self.mixer(x)
+        x = self.mlp_head(x)
+        return x
 
 
 class ConvNet(nn.Module):
     """Isotropic convolutional neural network with residual connections."""
 
-    def __init__(self, config: dict):
+    def __init__(self, config: Config):
         super().__init__()
 
         self.input_shape = config.data.input_shape
@@ -77,7 +111,7 @@ class ConvNet(nn.Module):
 class DenseNet(nn.Module):
     """Isotropic fully connected neural network with residual connections."""
 
-    def __init__(self, config: dict):
+    def __init__(self, config: Config):
         super().__init__()
 
         self.input_shape = config.data.input_shape
