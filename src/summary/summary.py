@@ -131,7 +131,7 @@ def add_hparams(
     writer.add_hparams(hparam_dict, metric_dict)
 
 
-def add_linear_weights(writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 64) -> None:
+def add_linear_weights(writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 128) -> None:
     """"""
     for name, module in model.named_modules():
         if isinstance(module, nn.Linear):
@@ -149,6 +149,26 @@ def add_linear_weights(writer: SummaryWriter, model: nn.Module, global_step: int
 
             # Extract samples
             n_samples = min(height, n_samples_max)
+            weight_rescaled = weight_rescaled[:n_samples]
+
+            writer.add_images(name, weight_rescaled, global_step, dataformats="NCHW")
+
+
+def add_patch_embedding_weights(writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 128) -> None:
+    """"""
+    for name, module in model.named_modules():
+        if isinstance(module, nn.Conv2d):
+
+            # Get the weights
+            weight = module.weight.detach().cpu()
+
+            # Rescale
+            x_min = torch.amin(weight, dim=(-2, -1), keepdim=True)
+            x_max = torch.amax(weight, dim=(-2, -1), keepdim=True)
+            weight_rescaled = (weight - x_min) / (x_max - x_min)
+
+            # Extract samples
+            n_samples = min(len(weight), n_samples_max)
             weight_rescaled = weight_rescaled[:n_samples]
 
             writer.add_images(name, weight_rescaled, global_step, dataformats="NCHW")
