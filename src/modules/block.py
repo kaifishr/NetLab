@@ -14,20 +14,22 @@ class DenseBlock(nn.Module):
         self.linear1 = nn.Linear(**linear_cfg)
         self.linear2 = nn.Linear(**linear_cfg)
 
-        self.bn1 = torch.nn.BatchNorm1d(num_features=out_features)
-        self.bn2 = torch.nn.BatchNorm1d(num_features=out_features)
+        self.ln1 = torch.nn.LayerNorm(out_features)
+        self.ln2 = torch.nn.LayerNorm(out_features)
+
+        self.gelu = nn.GELU()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
         identity = x
 
         out = self.linear1(x)
-        out = torch.relu(out)
-        out = self.bn1(out)
+        out = self.gelu(out)
+        out = self.ln1(out)
 
         out = self.linear2(out)
-        out = torch.relu(out)
-        out = self.bn2(out)
+        out = self.gelu(out)
+        out = self.ln2(out)
 
         return out + identity
 
@@ -46,7 +48,7 @@ class ConvBlock(torch.nn.Module):
         self.conv1 = nn.Conv2d(**conv_cfg)
         self.conv2 = nn.Conv2d(**conv_cfg)
 
-        self.relu = nn.ReLU(inplace=True)
+        self.gelu = nn.GELU()
 
         self.bn1 = torch.nn.BatchNorm2d(num_features=num_channels)
         self.bn2 = torch.nn.BatchNorm2d(num_features=num_channels)
