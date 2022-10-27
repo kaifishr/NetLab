@@ -106,26 +106,24 @@ class MixerBlock(nn.Module):
 class DenseBlock(nn.Module):
     """Dense block."""
 
-    def __init__(self, in_features: int, out_features: int) -> None:
+    def __init__(self, in_features: int, out_features: int, num_hidden: int) -> None:
         super().__init__()
 
-        num_hidden = 4
-        layers = []
-
+        blocks = []
         for _ in range(num_hidden):
-            layers += [
+            blocks += [
                 nn.Linear(in_features=in_features, out_features=out_features),
+                nn.GELU(),
                 nn.LayerNorm(out_features),
-                nn.Dropout(p=0.1),
-                nn.ReLU(),
             ]
-        self.mlp = nn.Sequential(*layers)
+
+        self.dense_block = nn.Sequential(*blocks)
         
         self.apply(self._init_weights)
 
     def _init_weights(self, module: nn.Module):
         if isinstance(module, nn.Linear):
-            torch.nn.init.kaiming_normal_(module.weight, nonlinearity="relu")
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
             elif isinstance(module, nn.LayerNorm):
@@ -133,5 +131,4 @@ class DenseBlock(nn.Module):
                 torch.nn.init.ones_(module.weight)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.mlp(x)
-        return x
+        return x + self.dense_block(x)

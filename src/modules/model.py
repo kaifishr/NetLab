@@ -16,8 +16,6 @@ class MlpMixer(nn.Module):
     def __init__(self, config: Config) -> None:
         super().__init__()
 
-        self.max_rand_depth = 8
-
         num_blocks = config.module.mlp_mixer.num_blocks
         model_dim = config.module.mlp_mixer.model_dim
         num_classes = config.data.num_classes
@@ -36,8 +34,7 @@ class MlpMixer(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """"""
         x = self.patch_embedding(x)
-        for _ in range(random.randint(1, self.max_rand_depth)):
-            x = self.mixer(x)
+        x = self.mixer(x)
         x = self.mlp_head(x)
         return x
 
@@ -77,7 +74,7 @@ class ConvNet(nn.Module):
         ]
 
         # Conv network hidden
-        for i in range(self.n_blocks):
+        for _ in range(self.n_blocks):
             layers.append(ConvBlock(num_channels=self.n_channels_hidden))
 
         # Conv network out
@@ -88,7 +85,7 @@ class ConvNet(nn.Module):
                 kernel_size=2,
                 stride=2,
             ),
-            nn.ReLU(inplace=True),
+            nn.GeLU(),
             nn.BatchNorm2d(num_features=self.n_channels_out),
         ]
 
@@ -115,36 +112,15 @@ class DenseNet(nn.Module):
         super().__init__()
 
         self.input_shape = config.data.input_shape
-        self.n_dims_in = prod(self.input_shape)
-        self.n_dims_out = config.data.n_classes
-        self.n_dims_hidden = config.densenet.n_dims_hidden
-        self.n_blocks = config.densenet.n_blocks
+        self.num_dim_in = prod(self.input_shape)
+        self.num_dim_out = config.data.num_classes
+        self.num_dim_hidden = config.densenet.num_dim_hidden
+        self.num_blocks = config.densenet.num_blocks
+        self.num_hidden = config.densenet.num_hidden
 
         self.classifier = self._make_classifier()
 
         self._weights_init()
-
-    def _make_classifier(self):
-        layers = []
-
-        # Input layer
-        layers += [
-            nn.Linear(in_features=self.n_dims_in, out_features=self.n_dims_hidden),
-            nn.BatchNorm1d(num_features=self.n_dims_hidden),
-        ]
-
-        # Hidden layer
-        for i in range(self.n_blocks):
-            layers.append(
-                DenseBlock(
-                    in_features=self.n_dims_hidden, out_features=self.n_dims_hidden
-                )
-            )
-
-        # Output layer
-        layers += [nn.Linear(self.n_dims_hidden, self.n_dims_out)]
-
-        return nn.Sequential(*layers)
 
     def _weights_init(self) -> None:
         for module in self.modules():
@@ -152,6 +128,30 @@ class DenseNet(nn.Module):
                 torch.nn.init.kaiming_uniform_(module.weight.data, nonlinearity="relu")
                 if module.bias is not None:
                     torch.nn.init.zeros_(module.bias.data)
+
+    def _make_classifier(self):
+        layers = []
+
+        # Input layer
+        layers += [
+            nn.Linear(in_features=self.num_dim_in, out_features=self.num_dim_hidden),
+            nn.LayerNorm(self.num_dim_hidden),
+        ]
+
+        # Hidden layer
+        for _ in range(self.num_blocks):
+            layers.append(
+                DenseBlock(
+                    in_features=self.num_dim_hidden, 
+                    out_features=self.num_dim_hidden,
+                    num_hidden=self.num_hidden
+                )
+            )
+
+        # Output layer
+        layers += [nn.Linear(self.num_dim_hidden, self.num_dim_out)]
+
+        return nn.Sequential(*layers)
 
     def forward(self, x):
         x = torch.flatten(x, start_dim=1)
