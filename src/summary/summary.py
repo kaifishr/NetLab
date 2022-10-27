@@ -163,8 +163,8 @@ def add_patch_embedding_weights(writer: SummaryWriter, model: nn.Module, global_
             weight = module.weight.detach().cpu()
 
             # Rescale
-            x_min = torch.amin(weight, dim=(-2, -1), keepdim=True)
-            x_max = torch.amax(weight, dim=(-2, -1), keepdim=True)
+            x_min = torch.amin(weight, dim=(1, 2, 3), keepdim=True)
+            x_max = torch.amax(weight, dim=(1, 2, 3), keepdim=True)
             weight_rescaled = (weight - x_min) / (x_max - x_min)
 
             # Extract samples
