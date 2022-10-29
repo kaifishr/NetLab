@@ -48,8 +48,8 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
                 transforms.RandomVerticalFlip(),
                 transforms.ColorJitter(brightness=0.5, hue=0.3),
                 transforms.RandomRotation(degrees=(0, 45)),
-                transforms.RandomErasing(),
                 transforms.ToTensor(),
+                transforms.RandomErasing(),
                 transforms.Normalize(*stats, inplace=True),
             ]
         )
@@ -89,8 +89,8 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
                 transforms.ColorJitter(brightness=0.5, hue=0.3),
                 # transforms.RandomRotation(degrees=45),
                 transforms.RandomCrop(32, padding=4),
-                transforms.RandomErasing(),
                 transforms.ToTensor(),
+                transforms.RandomErasing(),
                 transforms.Normalize(mean, std),
             ]
         )

@@ -57,7 +57,14 @@ class ConvNet(nn.Module):
             self.n_channels_out * (self.input_shape[-1] // 4) ** 2, self.n_dims_out
         )
 
-        self._weights_init()
+        self.apply(self._weights_init)
+
+    def _weights_init(self) -> None:
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                torch.nn.init.kaiming_uniform_(module.weight.data, nonlinearity="relu")
+                if module.bias is not None:
+                    torch.nn.init.zeros_(module.bias.data)
 
     def _feature_extractor(self):
         layers = []
@@ -91,13 +98,6 @@ class ConvNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _weights_init(self) -> None:
-        for module in self.modules():
-            if isinstance(module, nn.Linear):
-                torch.nn.init.kaiming_uniform_(module.weight.data, nonlinearity="relu")
-                if module.bias is not None:
-                    torch.nn.init.zeros_(module.bias.data)
-
     def forward(self, x):
         x = self.features(x)
         x = torch.flatten(x, start_dim=1, end_dim=-1)
@@ -120,14 +120,16 @@ class DenseNet(nn.Module):
 
         self.classifier = self._make_classifier()
 
-        self._weights_init()
+        self.apply(self._weights_init)
 
-    def _weights_init(self) -> None:
-        for module in self.modules():
-            if isinstance(module, nn.Linear):
-                torch.nn.init.kaiming_uniform_(module.weight.data, nonlinearity="relu")
-                if module.bias is not None:
-                    torch.nn.init.zeros_(module.bias.data)
+    def _weights_init(self, module: nn.Module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+            elif isinstance(module, nn.LayerNorm):
+                torch.nn.init.zeros_(module.bias)
+                torch.nn.init.ones_(module.weight)
 
     def _make_classifier(self):
         layers = []

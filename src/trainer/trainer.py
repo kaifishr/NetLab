@@ -94,8 +94,6 @@ class Trainer:
         """
         device = self.config.trainer.device
         n_epochs = self.config.trainer.n_epochs
-        save_train_stats_every_n_epochs = self.config.summary.save_train_stats_every_n_epochs
-        save_test_stats_every_n_epochs = self.config.summary.save_test_stats_every_n_epochs
 
         trainloader, testloader = self.dataloader
 
@@ -151,7 +149,7 @@ class Trainer:
 
             ###################
             # Simple to complex
-            if epoch % 2 == 0:
+            if epoch % 8 == 0:
                 prob += 0.01
                 if prob > 1.0:
                     prob = 1.0
@@ -171,50 +169,45 @@ class Trainer:
             train_loss = running_loss / running_counter
             train_accuracy = running_accuracy / running_counter
 
-            if (epoch % save_train_stats_every_n_epochs == 0) or (epoch + 1 == n_epochs):
-                writer.add_scalar("train_loss", train_loss, global_step=n_update_steps)
-                writer.add_scalar(
-                    "train_accuracy", train_accuracy, global_step=n_update_steps
-                )
+            summary = config.summary
 
-            if (epoch % save_test_stats_every_n_epochs == 0) or (epoch + 1 == n_epochs):
-                test_loss, test_accuracy = comp_stats_classification(
-                    model=model, criterion=criterion, data_loader=testloader, device=device
-                )
-                writer.add_scalar("test_loss", test_loss, global_step=n_update_steps)
-                writer.add_scalar(
-                    "test_accuracy", test_accuracy, global_step=n_update_steps
-                )
+            if summary.add_train_stats_every_n_epochs:
+                if (epoch % summary.add_train_stats_every_n_epochs == 0) or (epoch + 1 == n_epochs):
+                    writer.add_scalar("train_loss", train_loss, global_step=n_update_steps)
+                    writer.add_scalar("train_accuracy", train_accuracy, global_step=n_update_steps)
 
-                if config.summary.add_hparams:
-                    add_hparams(
-                        writer, config, train_loss, train_accuracy, test_loss, test_accuracy
+            if summary.add_test_stats_every_n_epochs:
+                if (epoch % summary.add_test_stats_every_n_epochs == 0) or (epoch + 1 == n_epochs):
+                    stats = comp_stats_classification(
+                        model=model, 
+                        criterion=criterion, 
+                        data_loader=testloader, 
+                        device=device
                     )
+                    test_loss, test_accuracy = stats
+                    writer.add_scalar("test_loss", test_loss, global_step=n_update_steps)
+                    writer.add_scalar("test_accuracy", test_accuracy, global_step=n_update_steps)
 
-            if config.summary.add_params_hist_every_n_epochs > 0:
-                if (epoch % config.summary.add_params_hist_every_n_epochs == 0) or (
-                    epoch + 1 == n_epochs
-                ):
+                    if summary.add_hparams:
+                        add_hparams(writer, config, train_loss, train_accuracy, test_loss, test_accuracy)
+
+            if summary.add_params_hist_every_n_epochs:
+                if (epoch % summary.add_params_hist_every_n_epochs == 0) or (epoch + 1 == n_epochs):
                     add_hist_params(model=model, writer=writer, global_step=epoch)
 
-            if config.summary.save_model_every_n_epochs > 0:
-                if (epoch % config.summary.save_model_every_n_epochs == 0) or (
-                    epoch + 1 == n_epochs
-                ):
+            if summary.add_model_every_n_epochs:
+                if (epoch % summary.add_model_every_n_epochs == 0) or (epoch + 1 == n_epochs):
                     dataset = config.dataloader.dataset
                     tag = f"_{config.tag}" if config.tag else ""
                     model_name = f"{dataset}_epoch_{epoch:04d}{tag}.pth"
                     model_path = os.path.join(config.dirs.weights, model_name)
-                    torch.save(model.state_dict(), model_path)
+                    torch.add(model.state_dict(), model_path)
 
-            if config.summary.save_weights_every_n_epochs > 0:
-                if (epoch % config.summary.save_weights_every_n_epochs == 0) or (
-                    epoch + 1 == n_epochs
-                ):
-                    pass
-                    # add_linear_weights(model=model, writer=writer, global_step=epoch)
-                    # add_patch_embedding_weights(model=model, writer=writer, global_step=epoch)
+            if summary.add_weights_every_n_epochs:
+                if (epoch % summary.add_weights_every_n_epochs == 0) or (epoch + 1 == n_epochs):
+                    add_linear_weights(model=model, writer=writer, global_step=epoch)
+                    add_patch_embedding_weights(model=model, writer=writer, global_step=epoch)
 
             print(f"{epoch:04d} {train_loss:.5f} {train_accuracy:.4f}")
 
-            self.writer.close()
+        self.writer.close()

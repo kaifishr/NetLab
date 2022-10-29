@@ -137,14 +137,18 @@ def add_linear_weights(writer: SummaryWriter, model: nn.Module, global_step: int
         if isinstance(module, nn.Linear):
             weight = module.weight.detach().cpu()
 
+            height, width = weight.shape
+            dim = int(math.sqrt(width))
+
+            if not dim**2 == width:
+                break
+
             # Rescale
             x_min, _ = torch.min(weight, dim=-1, keepdim=True)
             x_max, _ = torch.max(weight, dim=-1, keepdim=True)
             weight_rescaled = (weight - x_min) / (x_max - x_min)
 
             # Reshape
-            height, width = weight.shape
-            dim = int(math.sqrt(width))
             weight_rescaled = weight_rescaled.reshape(-1, 1, dim, dim)
 
             # Extract samples

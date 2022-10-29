@@ -80,7 +80,7 @@ def load_checkpoint(model: nn.Module, ckpt_dir: str, model_name: str) -> None:
 def set_attribute(model: torch.nn.Module, attribute: str, value) -> None:
     """
 
-    Example:
+    Typical usage example:
 
         # Set dropout rate manually:
         set_attribute(model=model, attribute="dropout_rate", value=0.5)
