@@ -5,7 +5,7 @@
 Machine learning engineering is highly experimental and iterative in nature. *NetLab* is a minimal development framework for rapid prototyping in PyTorch to make sure ideas can be validated quickly.
 
 *NetLab* provides boiler plate code for training neural networks 
-and lets you focus on more important things. *NetLab* also comes with explorative methods and useful utilities.
+and lets you focus on the important aspects of machine learning engineering. *NetLab* also comes with explorative methods and useful utilities.
 
 ## Usage
 
@@ -99,6 +99,7 @@ python make_clean.py --folders data/ runs/ weights/
 ## TODO 
 
 - Add callbacks
+- Add confusion matrix
 
 ## License
 
