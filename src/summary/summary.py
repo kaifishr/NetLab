@@ -166,16 +166,19 @@ def add_patch_embedding_weights(writer: SummaryWriter, model: nn.Module, global_
             # Get the weights
             weight = module.weight.detach().cpu()
 
+            if not weight.shape[1] == 3:
+                break
+
             # Rescale
             x_min = torch.amin(weight, dim=(1, 2, 3), keepdim=True)
             x_max = torch.amax(weight, dim=(1, 2, 3), keepdim=True)
-            weight_rescaled = (weight - x_min) / (x_max - x_min)
+            weight = (weight - x_min) / (x_max - x_min)
 
             # Extract samples
             n_samples = min(len(weight), n_samples_max)
-            weight_rescaled = weight_rescaled[:n_samples]
+            weight = weight[:n_samples]
 
-            writer.add_images(name, weight_rescaled, global_step, dataformats="NCHW")
+            writer.add_images(name, weight, global_step, dataformats="NCHW")
 
 
 def add_module_weights(

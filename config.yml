@@ -17,7 +17,7 @@ dataloader:
 # Data #
 ########
 data:
-  n_classes: Null
+  num_classes: Null
   input_shape: Null
 
 #########
@@ -30,8 +30,11 @@ convnet:
   n_blocks: 4
 
 densenet:
-  n_dims_hidden: 128
-  n_blocks: 4
+  patch_size: 2
+  embedding_channels: 16
+  num_dim_hidden: 256
+  num_blocks: 2
+  num_hidden: 2
 
 ###########
 # Trainer #
@@ -39,13 +42,12 @@ densenet:
 
 trainer:
   device: "gpu"   # gpu, cpu
-  n_epochs: 1
-  learning_rate: 1.0e-4
+  n_epochs: 10
+  learning_rate: 3.0e-4
   weight_decay: 0
-  lr_step_size: 100
+  lr_step_size: 2
   lr_gamma: 0.5
-  batch_size: 64
-  grad_norm_clip: 1.0
+  batch_size: 512
 
 ###########
 # Summary #
@@ -55,10 +57,11 @@ summary:
   add_graph: true
   add_sample_batch: true
   add_hparams: true
-  save_train_stats_every_n_epochs: 1
-  save_test_stats_every_n_epochs: 10
-  add_params_hist_every_n_epochs: 50
-  save_model_every_n_epochs: -1
+  add_train_stats_every_n_epochs: 1
+  add_test_stats_every_n_epochs: 2
+  add_weights_every_n_epochs: true
+  add_params_hist_every_n_epochs: true
+  add_model_every_n_epochs: true
 
 checkpoints:
   load_model: 0

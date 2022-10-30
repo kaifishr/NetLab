@@ -21,9 +21,7 @@ from ..config.config import Config
 from ..utils.tools import (
     count_model_parameters, 
     count_module_parameters,
-    set_attribute,
 )
-from src.modules.layer import Linear
 
 
 class Trainer:
@@ -106,14 +104,6 @@ class Trainer:
 
         n_update_steps = 0
 
-        ###################
-        prob = 0.01
-        for module in model.modules():
-            if isinstance(module, Linear):
-                setattr(module, "prob", prob)
-                module.mask()
-        ###################
-
         for epoch in range(n_epochs):
 
             running_loss = 0.0
@@ -146,18 +136,6 @@ class Trainer:
                 running_loss += loss.item()
                 running_accuracy += (torch.argmax(outputs, dim=1) == labels).float().sum()
                 running_counter += labels.size(0)
-
-            ###################
-            # Simple to complex
-            if epoch % 8 == 0:
-                prob += 0.01
-                if prob > 1.0:
-                    prob = 1.0
-                for module in model.modules():
-                    if isinstance(module, Linear):
-                        setattr(module, "prob", prob)
-                        module.mask()
-            ###################
 
             writer.add_scalar("time_per_epoch", time.time() - t0, global_step=epoch)
             writer.add_scalar(
@@ -201,7 +179,7 @@ class Trainer:
                     tag = f"_{config.tag}" if config.tag else ""
                     model_name = f"{dataset}_epoch_{epoch:04d}{tag}.pth"
                     model_path = os.path.join(config.dirs.weights, model_name)
-                    torch.add(model.state_dict(), model_path)
+                    torch.save(model.state_dict(), model_path)
 
             if summary.add_weights_every_n_epochs:
                 if (epoch % summary.add_weights_every_n_epochs == 0) or (epoch + 1 == n_epochs):

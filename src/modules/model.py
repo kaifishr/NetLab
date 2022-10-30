@@ -1,42 +1,15 @@
 """Collection of custom neural networks.
 
 """
-import random
-from math import prod
 import torch
 import torch.nn as nn
 
 from src.config import Config
-from .block import ConvBlock
-from .module import PatchEmbedding, DenseBlock, MixerBlock, AveragePool
-
-
-class MlpMixer(nn.Module):
-
-    def __init__(self, config: Config) -> None:
-        super().__init__()
-
-        num_blocks = config.module.mlp_mixer.num_blocks
-        model_dim = config.module.mlp_mixer.model_dim
-        num_classes = config.data.num_classes
-
-        self.patch_embedding = PatchEmbedding(config)
-
-        mixer_blocks = [MixerBlock(config) for _ in range(num_blocks)]
-        self.mixer = nn.Sequential(*mixer_blocks)
-
-        self.mlp_head = nn.Sequential(
-            nn.LayerNorm(model_dim),
-            AveragePool(dim=-2),
-            nn.Linear(in_features=model_dim, out_features=num_classes)
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """"""
-        x = self.patch_embedding(x)
-        x = self.mixer(x)
-        x = self.mlp_head(x)
-        return x
+from .module import (
+    PatchEmbedding, 
+    ConvBlock,
+    DenseBlock
+)
 
 
 class ConvNet(nn.Module):
@@ -47,7 +20,7 @@ class ConvNet(nn.Module):
 
         self.input_shape = config.data.input_shape
         self.n_channels_in = self.input_shape[0]
-        self.n_dims_out = config.data.n_classes
+        self.n_dims_out = config.data.num_classes
         self.n_channels_hidden = config.convnet.n_channels_hidden
         self.n_channels_out = config.convnet.n_channels_out
         self.n_blocks = config.convnet.n_blocks
@@ -59,12 +32,14 @@ class ConvNet(nn.Module):
 
         self.apply(self._weights_init)
 
-    def _weights_init(self) -> None:
-        for module in self.modules():
-            if isinstance(module, nn.Linear):
-                torch.nn.init.kaiming_uniform_(module.weight.data, nonlinearity="relu")
-                if module.bias is not None:
-                    torch.nn.init.zeros_(module.bias.data)
+    def _weights_init(self, module: nn.Module):
+        if isinstance(module, (nn.Conv2d, nn.Linear)):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.LayerNorm):
+            torch.nn.init.zeros_(module.bias)
+            torch.nn.init.ones_(module.weight)
 
     def _feature_extractor(self):
         layers = []
@@ -92,7 +67,7 @@ class ConvNet(nn.Module):
                 kernel_size=2,
                 stride=2,
             ),
-            nn.GeLU(),
+            nn.GELU(),
             nn.BatchNorm2d(num_features=self.n_channels_out),
         ]
 
@@ -112,12 +87,12 @@ class DenseNet(nn.Module):
         super().__init__()
 
         self.input_shape = config.data.input_shape
-        self.num_dim_in = prod(self.input_shape)
         self.num_dim_out = config.data.num_classes
         self.num_dim_hidden = config.densenet.num_dim_hidden
         self.num_blocks = config.densenet.num_blocks
         self.num_hidden = config.densenet.num_hidden
 
+        self.patch_embedding = PatchEmbedding(config=config)
         self.classifier = self._make_classifier()
 
         self.apply(self._weights_init)
@@ -127,22 +102,15 @@ class DenseNet(nn.Module):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
-            elif isinstance(module, nn.LayerNorm):
-                torch.nn.init.zeros_(module.bias)
-                torch.nn.init.ones_(module.weight)
+        elif isinstance(module, nn.LayerNorm):
+            torch.nn.init.zeros_(module.bias)
+            torch.nn.init.ones_(module.weight)
 
     def _make_classifier(self):
-        layers = []
+        blocks = []
 
-        # Input layer
-        layers += [
-            nn.Linear(in_features=self.num_dim_in, out_features=self.num_dim_hidden),
-            nn.LayerNorm(self.num_dim_hidden),
-        ]
-
-        # Hidden layer
         for _ in range(self.num_blocks):
-            layers.append(
+            blocks.append(
                 DenseBlock(
                     in_features=self.num_dim_hidden, 
                     out_features=self.num_dim_hidden,
@@ -151,11 +119,11 @@ class DenseNet(nn.Module):
             )
 
         # Output layer
-        layers += [nn.Linear(self.num_dim_hidden, self.num_dim_out)]
+        blocks.append(nn.Linear(self.num_dim_hidden, self.num_dim_out))
 
-        return nn.Sequential(*layers)
+        return nn.Sequential(*blocks)
 
     def forward(self, x):
-        x = torch.flatten(x, start_dim=1)
+        x = self.patch_embedding(x)
         x = self.classifier(x)
         return x

@@ -2,7 +2,7 @@
 
 This file shows a few examples how to use NetLab.
 """
-from src.modules.model import ConvNet, DenseNet, MlpMixer
+from src.modules.model import ConvNet, DenseNet
 from src.data.dataloader import get_dataloader
 from src.config.config import init_config
 from src.trainer.trainer import Trainer
@@ -82,9 +82,9 @@ def experiment_random_search():
 
 
 def main():
-    # experiment_imagewoof()
+    experiment_imagewoof()
     experiment_cifar10()
-    # experiment_random_search()
+    experiment_random_search()
 
 
 if __name__ == "__main__":
