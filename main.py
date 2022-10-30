@@ -5,7 +5,7 @@ This file shows a few examples how to use NetLab.
 from src.modules.model import ConvNet, DenseNet
 from src.data.dataloader import get_dataloader
 from src.config.config import init_config
-from src.train.train import train
+from src.trainer.trainer import Trainer
 from src.utils.tools import set_random_seed
 from src.utils.random_search import create_random_config_
 
@@ -14,7 +14,7 @@ def experiment_imagewoof():
 
     config = init_config(file_path="config.yml")
 
-    config.tag = "convnet"
+    config.tag = "diffnet"
     config.dataloader.dataset = "imagewoof"
 
     set_random_seed(seed=config.random_seed)
@@ -25,7 +25,8 @@ def experiment_imagewoof():
     model.to(config.trainer.device)
 
     print(config)
-    train(model=model, dataloader=dataloader, config=config)
+    trainer = Trainer(model=model, dataloader=dataloader, config=config)
+    trainer.run()
 
     print("Experiment finished.")
 
@@ -34,7 +35,7 @@ def experiment_cifar10():
 
     config = init_config(file_path="config.yml")
 
-    config.tag = "densenet"
+    config.tag = ""
     config.dataloader.dataset = "cifar10"
 
     set_random_seed(seed=config.random_seed)
@@ -45,7 +46,8 @@ def experiment_cifar10():
     model.to(config.trainer.device)
 
     print(config)
-    train(model=model, dataloader=dataloader, config=config)
+    trainer = Trainer(model=model, dataloader=dataloader, config=config)
+    trainer.run()
 
     print("Experiment finished.")
 
@@ -73,7 +75,8 @@ def experiment_random_search():
         model = DenseNet(config=config)
         model.to(config.trainer.device)
 
-        train(model=model, dataloader=dataloader, config=config)
+        trainer = Trainer(model=model, dataloader=dataloader, config=config)
+        trainer.run()
 
     print("Experiment finished.")
 

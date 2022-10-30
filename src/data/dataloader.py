@@ -49,6 +49,7 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
                 transforms.ColorJitter(brightness=0.5, hue=0.3),
                 transforms.RandomRotation(degrees=(0, 45)),
                 transforms.ToTensor(),
+                transforms.RandomErasing(),
                 transforms.Normalize(*stats, inplace=True),
             ]
         )
@@ -72,7 +73,7 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
         )
 
         # Add number of classes and input shape to config
-        config.data.n_classes = 10
+        config.data.num_classes = 10
         config.data.input_shape = (3, 128, 128)
 
     elif dataset == "cifar10":
@@ -89,6 +90,7 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
                 transforms.RandomRotation(degrees=45),
                 transforms.RandomCrop(32, padding=4),
                 transforms.ToTensor(),
+                transforms.RandomErasing(),
                 transforms.Normalize(mean, std),
             ]
         )
@@ -96,6 +98,8 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
         transform_test = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize(mean, std)]
         )
+
+        mean, std = None, None
 
         train_dataset = torchvision.datasets.CIFAR10(
             root="./data", train=True, download=True, transform=transform_train
@@ -105,7 +109,7 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
         )
 
         # Add number of classes and input shape to config
-        config.data.n_classes = 10
+        config.data.num_classes = 10
         config.data.input_shape = (3, 32, 32)
 
     elif dataset == "custom_from_numpy":
@@ -118,11 +122,11 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
         def get_random_dataset():
 
             n_samples = 10
-            n_classes = 2
+            num_classes = 2
             n_dims_in = (3, 32, 32)
 
             x = np.random.randn(n_dims_in)
-            y = np.random.randint(n_classes, size=n_samples)
+            y = np.random.randint(num_classes, size=n_samples)
 
             x = torch.Tensor(x)
             y = torch.Tensor(y).long()
@@ -150,7 +154,7 @@ def get_dataloader(config: dict) -> tuple[DataLoader, DataLoader]:
         )
 
         # Add number of classes and input shape to config
-        config.data.n_classes = 2
+        config.data.num_classes = 2
         config.data.input_shape = (3, 32, 32)
 
     else:

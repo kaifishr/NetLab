@@ -1,9 +1,17 @@
+"""
+TODO: 
+    - move to metrics
+
+"""
 import torch
 
 
 @torch.no_grad()
 def comp_stats_classification(
-    model, criterion, data_loader, device
+    model: torch.nn.Module, 
+    criterion, 
+    data_loader, 
+    device: torch.device
 ) -> tuple[float, float]:
     """Compute loss and accuracy for classification task."""
     model.eval()
@@ -22,7 +30,12 @@ def comp_stats_classification(
 
 
 @torch.no_grad()
-def comp_stats_regression(model, criterion, data_loader, device) -> float:
+def comp_stats_regression(
+    model: torch.nn.Module, 
+    criterion, 
+    data_loader, 
+    device: torch.device
+) -> float:
     """Compute loss for regression task."""
     model.eval()
     running_loss = 0.0
