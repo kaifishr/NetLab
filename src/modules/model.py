@@ -15,16 +15,17 @@ class ConvNet(nn.Module):
         super().__init__()
 
         self.input_shape = config.data.input_shape
-        self.n_channels_in = self.input_shape[0]
-        self.n_dims_out = config.data.num_classes
-        self.n_channels_hidden = config.convnet.n_channels_hidden
-        self.n_channels_out = config.convnet.n_channels_out
-        self.n_blocks = config.convnet.n_blocks
+        self.num_channels_in = self.input_shape[0]
+        self.num_dims_out = config.data.num_classes
+        self.num_channels_hidden = config.convnet.num_channels_hidden
+        self.num_channels_out = config.convnet.num_channels_out
+        self.num_blocks = config.convnet.num_blocks
 
         self.features = self._feature_extractor()
-        self.classifier = nn.Linear(
-            self.n_channels_out * (self.input_shape[-1] // 4) ** 2, self.n_dims_out
-        )
+
+        in_features = self.num_channels_out * (self.input_shape[-1] // 4) ** 2
+        out_features = self.num_dims_out
+        self.classifier = nn.Linear(in_features=in_features, out_features=out_features)
 
         self.apply(self._weights_init)
 
@@ -43,28 +44,28 @@ class ConvNet(nn.Module):
         # Conv network input
         layers += [
             nn.Conv2d(
-                in_channels=self.n_channels_in,
-                out_channels=self.n_channels_hidden,
+                in_channels=self.num_channels_in,
+                out_channels=self.num_channels_hidden,
                 kernel_size=2,
                 stride=2,
             ),
-            nn.BatchNorm2d(num_features=self.n_channels_hidden),
+            nn.BatchNorm2d(num_features=self.num_channels_hidden),
         ]
 
         # Conv network hidden
-        for _ in range(self.n_blocks):
-            layers.append(ConvBlock(num_channels=self.n_channels_hidden))
+        for _ in range(self.num_blocks):
+            layers.append(ConvBlock(num_channels=self.num_channels_hidden))
 
         # Conv network out
         layers += [
             nn.Conv2d(
-                in_channels=self.n_channels_hidden,
-                out_channels=self.n_channels_out,
+                in_channels=self.num_channels_hidden,
+                out_channels=self.num_channels_out,
                 kernel_size=2,
                 stride=2,
             ),
             nn.GELU(),
-            nn.BatchNorm2d(num_features=self.n_channels_out),
+            nn.BatchNorm2d(num_features=self.num_channels_out),
         ]
 
         return nn.Sequential(*layers)

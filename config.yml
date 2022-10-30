@@ -8,6 +8,7 @@ random_seed: 0
 ##############
 # Dataloader #
 ##############
+
 # cifar10, imagewoof
 dataloader:
   dataset: "cifar10"
@@ -16,6 +17,7 @@ dataloader:
 ########
 # Data #
 ########
+
 data:
   num_classes: Null
   input_shape: Null
@@ -25,9 +27,9 @@ data:
 #########
 
 convnet:
-  n_channels_hidden: 16
-  n_channels_out: 8
-  n_blocks: 4
+  num_channels_hidden: 16
+  num_channels_out: 8
+  num_blocks: 4
 
 densenet:
   patch_size: 2
