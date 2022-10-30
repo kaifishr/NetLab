@@ -98,10 +98,8 @@ def set_attribute(model: torch.nn.Module, attribute: str, value) -> None:
 
 
 def count_model_parameters(
-    model: nn.Module, 
-    is_trainable: bool = True, 
-    verbose: bool = True
-    ) -> None:
+    model: nn.Module, is_trainable: bool = True, verbose: bool = True
+) -> None:
     """Counts model parameters.
 
     Args:
@@ -128,12 +126,17 @@ def count_module_parameters(model: nn.Module, is_trainable: bool = True) -> None
         is_trainable: Count only trainable parameters if true.
 
     """
+
     def count_parameters(module: nn.Module, indent=0):
         spaces = 4 * indent * " "
         indent += 1
         print()
         for child_name, child_module in module.named_children():
-            num_params = sum(params.numel() for params in child_module.parameters() if params.requires_grad is is_trainable)
+            num_params = sum(
+                params.numel()
+                for params in child_module.parameters()
+                if params.requires_grad is is_trainable
+            )
             print(f"{spaces}{child_name}: {num_params}")
             for params_name, params in child_module.named_parameters():
                 if "." not in params_name:

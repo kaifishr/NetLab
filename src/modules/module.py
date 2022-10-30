@@ -21,7 +21,9 @@ class PatchEmbedding(nn.Module):
 
         assert (img_height % patch_size == 0) and (img_width % patch_size == 0)
 
-        dim_embedding = embedding_channels * (img_height // patch_size) * (img_width // patch_size)
+        dim_embedding = (
+            embedding_channels * (img_height // patch_size) * (img_width // patch_size)
+        )
 
         self.conv = nn.Conv2d(
             in_channels=img_channels,
@@ -30,10 +32,7 @@ class PatchEmbedding(nn.Module):
             stride=(patch_size, patch_size),
         )
 
-        self.linear = nn.Linear(
-            in_features=dim_embedding,
-            out_features=num_dim_hidden
-        )
+        self.linear = nn.Linear(in_features=dim_embedding, out_features=num_dim_hidden)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv(x)
@@ -45,17 +44,17 @@ class PatchEmbedding(nn.Module):
 class DenseBlock(nn.Module):
     """Dense block."""
 
-    def __init__(self, in_features: int, out_features: int, num_hidden: int = 2) -> None:
+    def __init__(
+        self, in_features: int, out_features: int, num_hidden: int = 2
+    ) -> None:
         super().__init__()
 
         blocks = []
         for _ in range(num_hidden):
-            blocks += [
-                DenseLayer(in_features=in_features, out_features=out_features)
-            ]
+            blocks += [DenseLayer(in_features=in_features, out_features=out_features)]
 
         self.dense_block = nn.Sequential(*blocks)
-        
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x + self.dense_block(x)
 

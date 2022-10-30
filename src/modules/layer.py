@@ -4,6 +4,7 @@
 import torch
 from torch import nn
 
+
 class DenseLayer(nn.Module):
     """Dense Layer."""
 

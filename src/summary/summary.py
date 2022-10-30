@@ -131,7 +131,9 @@ def add_hparams(
     writer.add_hparams(hparam_dict, metric_dict)
 
 
-def add_linear_weights(writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 128) -> None:
+def add_linear_weights(
+    writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 128
+) -> None:
     """"""
     for name, module in model.named_modules():
         if isinstance(module, nn.Linear):
@@ -158,7 +160,9 @@ def add_linear_weights(writer: SummaryWriter, model: nn.Module, global_step: int
             writer.add_images(name, weight_rescaled, global_step, dataformats="NCHW")
 
 
-def add_patch_embedding_weights(writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 128) -> None:
+def add_patch_embedding_weights(
+    writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 128
+) -> None:
     """"""
     for name, module in model.named_modules():
         if isinstance(module, nn.Conv2d):

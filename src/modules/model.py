@@ -5,11 +5,7 @@ import torch
 import torch.nn as nn
 
 from src.config import Config
-from .module import (
-    PatchEmbedding, 
-    ConvBlock,
-    DenseBlock
-)
+from .module import PatchEmbedding, ConvBlock, DenseBlock
 
 
 class ConvNet(nn.Module):
@@ -112,9 +108,9 @@ class DenseNet(nn.Module):
         for _ in range(self.num_blocks):
             blocks.append(
                 DenseBlock(
-                    in_features=self.num_dim_hidden, 
+                    in_features=self.num_dim_hidden,
                     out_features=self.num_dim_hidden,
-                    num_hidden=self.num_hidden
+                    num_hidden=self.num_hidden,
                 )
             )
 
