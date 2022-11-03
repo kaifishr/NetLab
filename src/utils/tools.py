@@ -29,6 +29,28 @@ def init_weights(module: torch.nn.Module) -> None:
             torch.nn.init.zeros_(module.bias.data)
 
 
+@torch.no_grad()
+def _mutate_weights(module: nn.Module, mutation_prob: float, mutation_rate: float) -> None:
+    """Mutates weights of model.
+
+    Args:
+        module: Pytorch module object.
+        mutation_prob: Mutation probability.
+        mutation_rate: Mutation rate / magnitude.
+
+    Returns: None
+
+    """
+    if isinstance(module, (nn.Linear, nn.Conv2d)):
+        mask = torch.rand_like(module.weight) < mutation_prob
+        mutation = mutation_rate * torch.randn_like(module.weight)
+        module.weight.add_(mask * mutation)
+        if module.bias is not None:
+            mask = torch.rand_like(module.bias) < mutation_prob
+            mutation = mutation_rate * torch.randn_like(module.bias)
+            module.bias.add_(mask * mutation)
+
+
 def replace_module(module, old_module, new_module) -> None:
     """Replaces modules in existing PyTorch model.
 
