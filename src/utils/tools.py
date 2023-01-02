@@ -30,7 +30,9 @@ def init_weights(module: torch.nn.Module) -> None:
 
 
 @torch.no_grad()
-def _mutate_weights(module: nn.Module, mutation_prob: float, mutation_rate: float) -> None:
+def _mutate_weights(
+    module: nn.Module, mutation_prob: float, mutation_rate: float
+) -> None:
     """Mutates weights of model.
 
     Args:

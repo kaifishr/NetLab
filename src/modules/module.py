@@ -93,3 +93,70 @@ class ConvBlock(nn.Module):
         out += identity
 
         return out
+
+
+class TokenEmbedding(nn.Module):
+    """Token embedding module
+
+    Embeds an integer as a vector of defined dimension.
+
+    Attributes:
+        embedding_dim:
+    """
+
+    def __init__(self, config: Config) -> None:
+        """Initializes PositionalEmbedding."""
+        super().__init__()
+
+        num_tokens = config.data.num_tokens
+        embedding_dim = config.model.embedding_dim
+
+        size = (num_tokens, embedding_dim)
+        embedding = torch.normal(mean=0.0, std=0.02, size=size)
+        self.embedding = nn.Parameter(data=embedding, requires_grad=True)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Receives sequences of token identifiers and returns embedding.
+
+        Args:
+            x: Integer tensor holding integer token identifiers.
+
+        Returns:
+            Embedded tokens.
+        """
+        x = self.embedding[x]
+        return x
+
+
+class PositionEmbedding(nn.Module):
+    """Positional embedding module.
+
+    Attributes:
+        sequence_length:
+        embedding_dim:
+    """
+
+    def __init__(self, config: Config) -> None:
+        """Initializes PositionalEmbedding."""
+        super().__init__()
+
+        sequence_length = config.model.input_sequence_length
+        embedding_dim = config.model.embedding_dim
+
+        size = (sequence_length, embedding_dim)
+        embedding = torch.normal(mean=0.0, std=0.02, size=size)
+        self.embedding = nn.Parameter(data=embedding, requires_grad=True)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = x + self.embedding
+        return x
+
+
+class SwapAxes(nn.Module):
+    def __init__(self, axis0: int, axis1):
+        super().__init__()
+        self.axis0 = axis0
+        self.axis1 = axis1
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return torch.swapaxes(x, axis0=self.axis0, axis1=self.axis1)
