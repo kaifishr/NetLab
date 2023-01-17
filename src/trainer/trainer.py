@@ -69,25 +69,15 @@ class Trainer:
         trainloader, testloader = self.dataloader
 
         if config.summary.add_graph:
-            add_graph(
-                model=model, dataloader=trainloader, writer=self.writer, config=config
-            )
+            add_graph(model=model, dataloader=trainloader, writer=self.writer, config=config)
 
         if config.summary.add_sample_batch:
-            add_input_samples(
-                dataloader=trainloader, writer=self.writer, tag="train", global_step=0
-            )
-            add_input_samples(
-                dataloader=testloader, writer=self.writer, tag="test", global_step=0
-            )
+            add_input_samples(dataloader=trainloader, writer=self.writer, tag="train", global_step=0)
+            add_input_samples(dataloader=testloader, writer=self.writer, tag="test", global_step=0)
 
-        self.optimizer = optim.Adam(
-            model.parameters(), lr=learning_rate, weight_decay=weight_decay
-        )
+        self.optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         self.criterion = nn.CrossEntropyLoss()
-        self.scheduler = torch.optim.lr_scheduler.StepLR(
-            self.optimizer, step_size=step_size, gamma=gamma
-        )
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=step_size, gamma=gamma)
 
     def run(self):
         """Main training logic.
@@ -144,15 +134,11 @@ class Trainer:
 
                 # keeping track of statistics
                 running_loss += loss.item()
-                running_accuracy += (
-                    (torch.argmax(outputs, dim=1) == labels).float().sum()
-                )
+                running_accuracy += (torch.argmax(outputs, dim=1) == labels).float().sum()
                 running_counter += labels.size(0)
 
             writer.add_scalar("time_per_epoch", time.time() - t0, global_step=epoch)
-            writer.add_scalar(
-                "learning_rate", scheduler.get_last_lr()[0], global_step=epoch
-            )
+            writer.add_scalar("learning_rate", scheduler.get_last_lr()[0], global_step=epoch)
 
             scheduler.step()
 
@@ -162,20 +148,12 @@ class Trainer:
             summary = config.summary
 
             if summary.add_train_stats_every_n_epochs:
-                if (epoch % summary.add_train_stats_every_n_epochs == 0) or (
-                    epoch + 1 == n_epochs
-                ):
-                    writer.add_scalar(
-                        "train_loss", train_loss, global_step=n_update_steps
-                    )
-                    writer.add_scalar(
-                        "train_accuracy", train_accuracy, global_step=n_update_steps
-                    )
+                if (epoch % summary.add_train_stats_every_n_epochs == 0) or (epoch + 1 == n_epochs):
+                    writer.add_scalar("train_loss", train_loss, global_step=n_update_steps)
+                    writer.add_scalar("train_accuracy", train_accuracy, global_step=n_update_steps)
 
             if summary.add_test_stats_every_n_epochs:
-                if (epoch % summary.add_test_stats_every_n_epochs == 0) or (
-                    epoch + 1 == n_epochs
-                ):
+                if (epoch % summary.add_test_stats_every_n_epochs == 0) or (epoch + 1 == n_epochs):
                     stats = comp_stats_classification(
                         model=model,
                         criterion=criterion,
@@ -183,12 +161,8 @@ class Trainer:
                         device=device,
                     )
                     test_loss, test_accuracy = stats
-                    writer.add_scalar(
-                        "test_loss", test_loss, global_step=n_update_steps
-                    )
-                    writer.add_scalar(
-                        "test_accuracy", test_accuracy, global_step=n_update_steps
-                    )
+                    writer.add_scalar("test_loss", test_loss, global_step=n_update_steps)
+                    writer.add_scalar("test_accuracy", test_accuracy, global_step=n_update_steps)
 
                     if summary.add_hparams:
                         add_hparams(
@@ -201,15 +175,11 @@ class Trainer:
                         )
 
             if summary.add_params_hist_every_n_epochs:
-                if (epoch % summary.add_params_hist_every_n_epochs == 0) or (
-                    epoch + 1 == n_epochs
-                ):
+                if (epoch % summary.add_params_hist_every_n_epochs == 0) or (epoch + 1 == n_epochs):
                     add_hist_params(model=model, writer=writer, global_step=epoch)
 
             if summary.add_model_every_n_epochs:
-                if (epoch % summary.add_model_every_n_epochs == 0) or (
-                    epoch + 1 == n_epochs
-                ):
+                if (epoch % summary.add_model_every_n_epochs == 0) or (epoch + 1 == n_epochs):
                     dataset = config.dataloader.dataset
                     tag = f"_{config.tag}" if config.tag else ""
                     model_name = f"{dataset}_epoch_{epoch:04d}{tag}.pth"
@@ -217,13 +187,9 @@ class Trainer:
                     torch.save(model.state_dict(), model_path)
 
             if summary.add_weights_every_n_epochs:
-                if (epoch % summary.add_weights_every_n_epochs == 0) or (
-                    epoch + 1 == n_epochs
-                ):
+                if (epoch % summary.add_weights_every_n_epochs == 0) or (epoch + 1 == n_epochs):
                     add_linear_weights(model=model, writer=writer, global_step=epoch)
-                    add_patch_embedding_weights(
-                        model=model, writer=writer, global_step=epoch
-                    )
+                    add_patch_embedding_weights(model=model, writer=writer, global_step=epoch)
 
             print(f"{epoch:04d} {train_loss:.5f} {train_accuracy:.4f}")
 

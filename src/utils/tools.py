@@ -32,9 +32,7 @@ def init_weights(module: torch.nn.Module) -> None:
 
 
 @torch.no_grad()
-def _mutate_weights(
-    module: nn.Module, mutation_prob: float, mutation_rate: float
-) -> None:
+def _mutate_weights(module: nn.Module, mutation_prob: float, mutation_rate: float) -> None:
     """Mutates weights of model.
 
     Args:
@@ -123,9 +121,7 @@ def set_attribute(model: torch.nn.Module, attribute: str, value) -> None:
             setattr(module, attribute, value)
 
 
-def count_model_parameters(
-    model: nn.Module, is_trainable: bool = True, verbose: bool = True
-) -> None:
+def count_model_parameters(model: nn.Module, is_trainable: bool = True, verbose: bool = True) -> None:
     """Counts model parameters.
 
     Args:
@@ -134,14 +130,10 @@ def count_model_parameters(
         verbose: Print number of trainable parameters.
 
     """
-    n_params = sum(
-        p.numel() for p in model.parameters() if p.requires_grad is is_trainable
-    )
+    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad is is_trainable)
 
     if verbose:
-        print(
-            f"Number of trainable parameters: {'.'.join(wrap(str(n_params)[::-1], 3))[::-1]}."
-        )
+        print(f"Number of trainable parameters: {'.'.join(wrap(str(n_params)[::-1], 3))[::-1]}.")
 
 
 def count_module_parameters(model: nn.Module, is_trainable: bool = True) -> None:
@@ -159,9 +151,7 @@ def count_module_parameters(model: nn.Module, is_trainable: bool = True) -> None
         print()
         for child_name, child_module in module.named_children():
             num_params = sum(
-                params.numel()
-                for params in child_module.parameters()
-                if params.requires_grad is is_trainable
+                params.numel() for params in child_module.parameters() if params.requires_grad is is_trainable
             )
             print(f"{spaces}{child_name}: {num_params}")
             for params_name, params in child_module.named_parameters():
@@ -192,10 +182,10 @@ def set_random_seed(seed: int = 0, is_cuda_deterministic: bool = False) -> None:
 
 def evolve_layer(model: nn.Module, prob: float):
     """Method to control gates of Simple-to-Complex layers.
-    
+
     Args:
         prob: Probability that a gate is open.
-        
+
     """
     for module in model.modules():
         if isinstance(module, SimpleComplexLinear):

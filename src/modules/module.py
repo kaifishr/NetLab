@@ -21,9 +21,7 @@ class PatchEmbedding(nn.Module):
 
         assert (img_height % patch_size == 0) and (img_width % patch_size == 0)
 
-        dim_embedding = (
-            embedding_channels * (img_height // patch_size) * (img_width // patch_size)
-        )
+        dim_embedding = embedding_channels * (img_height // patch_size) * (img_width // patch_size)
 
         self.conv = nn.Conv2d(
             in_channels=img_channels,
@@ -44,9 +42,7 @@ class PatchEmbedding(nn.Module):
 class DenseBlock(nn.Module):
     """Dense block."""
 
-    def __init__(
-        self, in_features: int, out_features: int, num_hidden: int = 2
-    ) -> None:
+    def __init__(self, in_features: int, out_features: int, num_hidden: int = 2) -> None:
         super().__init__()
 
         blocks = []

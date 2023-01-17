@@ -23,7 +23,7 @@ class DenseLayer(nn.Module):
         return x
 
 
-class SimpleComplexLinear(nn.Module): 
+class SimpleComplexLinear(nn.Module):
     """Linear layer to simulation evolution from simple to complex.
 
     Typical usage:
@@ -40,9 +40,10 @@ class SimpleComplexLinear(nn.Module):
 
         prob += 0.001
         evolve_layer(model=model, prob=prob)  # tools.py
-    
+
     """
-    def __init__(self, in_features: int, out_features: int, bias: bool=True):
+
+    def __init__(self, in_features: int, out_features: int, bias: bool = True):
         super().__init__()
 
         self.weight = torch.nn.Parameter(torch.empty((out_features, in_features)))

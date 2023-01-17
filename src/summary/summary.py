@@ -14,9 +14,7 @@ from src.modules.module import PatchEmbedding
 from ..config.config import Config
 
 
-def add_graph(
-    model: nn.Module, dataloader: DataLoader, writer: SummaryWriter, config: Config
-) -> None:
+def add_graph(model: nn.Module, dataloader: DataLoader, writer: SummaryWriter, config: Config) -> None:
     """Add graph of model to Tensorboard.
 
     Args:
@@ -131,9 +129,7 @@ def add_hparams(
     writer.add_hparams(hparam_dict, metric_dict)
 
 
-def add_linear_weights(
-    writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 128
-) -> None:
+def add_linear_weights(writer: SummaryWriter, model: nn.Module, global_step: int, n_samples_max: int = 128) -> None:
     """"""
     for name, module in model.named_modules():
         if isinstance(module, nn.Linear):

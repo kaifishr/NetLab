@@ -27,9 +27,7 @@ def comp_stats_classification(
 
 
 @torch.no_grad()
-def comp_stats_regression(
-    model: torch.nn.Module, criterion, data_loader, device: torch.device
-) -> float:
+def comp_stats_regression(model: torch.nn.Module, criterion, data_loader, device: torch.device) -> float:
     """Compute loss for regression task."""
     model.eval()
     running_loss = 0.0

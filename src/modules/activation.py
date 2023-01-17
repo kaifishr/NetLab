@@ -41,12 +41,8 @@ class ReLU3(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.init_weights:
-            self.a = torch.nn.Parameter(
-                torch.ones(size=x.shape[1:], device="cuda:0"), requires_grad=True
-            )
-            self.b = torch.nn.Parameter(
-                torch.ones(size=x.shape[1:], device="cuda:0"), requires_grad=True
-            )
+            self.a = torch.nn.Parameter(torch.ones(size=x.shape[1:], device="cuda:0"), requires_grad=True)
+            self.b = torch.nn.Parameter(torch.ones(size=x.shape[1:], device="cuda:0"), requires_grad=True)
             self.init_weights = False
         return torch.relu(self.a * x) - torch.relu(-self.b * x)
 
