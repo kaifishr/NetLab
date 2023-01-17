@@ -8,6 +8,8 @@ from textwrap import wrap
 import torch
 from torch import nn
 
+from src.modules.layer import SimpleComplexLinear
+
 
 def init_weights(module: torch.nn.Module) -> None:
     """Initializes weights in network.
@@ -186,3 +188,16 @@ def set_random_seed(seed: int = 0, is_cuda_deterministic: bool = False) -> None:
     np.random.seed(seed)
     if is_cuda_deterministic:
         torch.use_deterministic_algorithms(is_cuda_deterministic)
+
+
+def evolve_layer(model: nn.Module, prob: float):
+    """Method to control gates of Simple-to-Complex layers.
+    
+    Args:
+        prob: Probability that a gate is open.
+        
+    """
+    for module in model.modules():
+        if isinstance(module, SimpleComplexLinear):
+            module.probability = prob
+            module.evolve()
